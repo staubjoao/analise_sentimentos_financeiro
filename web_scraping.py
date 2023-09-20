@@ -1,6 +1,8 @@
 import urllib.request
 from bs4 import BeautifulSoup
 import pandas as pd
+import datetime
+import sys
 
 
 headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36",
@@ -98,8 +100,48 @@ def scrape_investing_news(url):
     else:
         print(f'Erro ao acessar a página: {status_code}')
         return 0
+
+def scrape_investing_news_period(url, inicio, dias):
+    # Fazer a solicitação HTTP para a página de notícias da ação
+    req = urllib.request.Request(url=url, headers=headers) 
+    resp = urllib.request.urlopen(req)
+    
+    status_code = resp.getcode()  # Obtenha o código de status HTTP
+    
+    if status_code == 200:
+        soup = BeautifulSoup(resp, 'html.parser')
+        
+        # Encontrar os elementos que contêm as notícias
+        news_elements = soup.find_all('div', class_='mb-4')
+
+        news_element = news_elements[0]
+
+        news_elements = news_element.find('ul')
+
+        links = news_elements.find_all('a', href=True)
+        
+        news = []
+
+        for link in links:
+            aux = link['href']
+            aux = aux.split("#")
+            aux = aux[0]
+            news.append(aux)
+        news = f7(news)
+        return ((len(news)), news)
+
+    else:
+        print(f'Erro ao acessar a página: {status_code}')
+        return 0
     
 def main():
+    if len(sys.argv) == 1:
+        print("Utilize 'web_scraping.py -h' para listar os comandos")
+        sys.exit(1)
+    elif len(sys.argv) == 2:
+        if sys.argv[1] == '-h':
+            print('Utilize \'-all\' para realizar o web_scraping de todos')
+            print('Utilize \'-d <data>\' para definir a data da noticia que deseja com')
     urls_noticias = ["magaz-luiza-on-nm-news", "b2w-varejo-on-nm-news", "petrobras-pn-news"]
     cod_noticias = ["MGLU3", "AMER3", "PETR4"]
 
