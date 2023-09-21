@@ -9,58 +9,61 @@ headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KH
                 "X-Requested-With": "XMLHttpRequest"}
 
 def scrape_specific_news(url):
-    req = urllib.request.Request(url=url, headers=headers) 
-    resp = urllib.request.urlopen(req)
+    try:
+        print(url)
+        req = urllib.request.Request(url=url, headers=headers) 
+        resp = urllib.request.urlopen(req)
 
-    status_code = resp.getcode()  # Obtenha o código de status HTTP
+        status_code = resp.getcode()  # Obtenha o código de status HTTP
 
-    if status_code == 200:
-        soup = BeautifulSoup(resp, 'html.parser')
+        if status_code == 200:
+            soup = BeautifulSoup(resp, 'html.parser')
 
-        titulo = soup.find('h1', class_='articleHeader').text
+            titulo = soup.find('h1', class_='articleHeader').text
 
-        span_data_hora = soup.find_all('div', class_='contentSectionDetails')
+            span_data_hora = soup.find_all('div', class_='contentSectionDetails')
 
-        data = None
-        hora = None
-        for elemento_span in span_data_hora:
-            span_text = elemento_span.get_text(strip=True)
-            if 'Publicado' in span_text:
-                aux = span_text.split('Atualizado')
-                aux = aux[0].split('Publicado')
-                aux = aux[1].split(' ')
-                data, hora = aux[1], aux[2]
+            data = None
+            hora = None
+            for elemento_span in span_data_hora:
+                span_text = elemento_span.get_text(strip=True)
+                if 'Publicado' in span_text:
+                    aux = span_text.split('Atualizado')
+                    aux = aux[0].split('Publicado')
+                    aux = aux[1].split(' ')
+                    data, hora = aux[1], aux[2]
 
-        corpo = soup.find('div', class_='articlePage')
-        textos = corpo.find_all('p')
+            corpo = soup.find('div', class_='articlePage')
+            textos = corpo.find_all('p')
 
-        texto = []
-        for i, txt in enumerate(textos):
-            if txt.find('strong') != None:
-                break
-            
-            if 'Posição adicionada com êxito a' not in txt.text:
-                texto.append(txt.text)
+            texto = []
+            for i, txt in enumerate(textos):
+                if txt.find('strong') != None:
+                    break
                 
-        if len(texto) <= 1:
-            return None
+                if 'Posição adicionada com êxito a' not in txt.text:
+                    texto.append(txt.text)
+                    
+            if len(texto) <= 1:
+                return None
 
-        print(data, hora)
-        print(titulo)
-        print(texto)
+            print(data, hora)
+            print(url)
+            print(texto)
 
-        print()
+            print()
 
-        noticia = {
-            "titulo": titulo,
-            "data": data,
-            "hora": hora,
-            "texto": texto,
-        }
-    
-        return noticia
-    else:
-        print(f'Erro ao acessar a página: {status_code}')
+            noticia = {
+                "url": url,
+                "titulo": titulo,
+                "data": data,
+                "hora": hora,
+                "texto": texto,
+            }
+        
+            return noticia
+    except Exception as inst:
+        print(f'Erro ao acessar a página: {status_code} - {inst}')
         return None
 
 def f7(seq):
@@ -135,19 +138,19 @@ def scrape_investing_news_period(url, inicio, dias):
         return 0
     
 def main():
-    if len(sys.argv) == 1:
-        print("Utilize 'web_scraping.py -h' para listar os comandos")
-        sys.exit(1)
-    elif len(sys.argv) == 2:
-        if sys.argv[1] == '-h':
-            print('Utilize \'-all\' para realizar o web_scraping de todos')
-            print('Utilize \'-d <data>\' para definir a data da noticia que deseja com')
+    # if len(sys.argv) == 1:
+    #     print("Utilize 'web_scraping.py -h' para listar os comandos")
+    #     sys.exit(1)
+    # elif len(sys.argv) == 2:
+    #     if sys.argv[1] == '-h':
+    #         print('Utilize \'-all\' para realizar o web_scraping de todos')
+    #         print('Utilize \'-d <data>\' para definir a data da noticia que deseja com')
     urls_noticias = ["magaz-luiza-on-nm-news", "b2w-varejo-on-nm-news", "petrobras-pn-news"]
     cod_noticias = ["MGLU3", "AMER3", "PETR4"]
 
-    for i in range(len(urls_noticias)): 
+    for i in range(2, len(urls_noticias)): 
         print(f"Notícias do {cod_noticias[i]}\n")
-        cont = 50
+        cont = 150
         cont_aux = cont
         noticias = []
         pag_noticias = 1
