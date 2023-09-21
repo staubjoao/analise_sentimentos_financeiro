@@ -148,7 +148,7 @@ def main():
     urls_noticias = ["magaz-luiza-on-nm-news", "b2w-varejo-on-nm-news", "petrobras-pn-news"]
     cod_noticias = ["MGLU3", "AMER3", "PETR4"]
 
-    for i in range(2, len(urls_noticias)): 
+    for i in range(len(urls_noticias)): 
         print(f"Notícias do {cod_noticias[i]}\n")
         cont = 150
         cont_aux = cont
