@@ -1,6 +1,8 @@
 import urllib.request
 from bs4 import BeautifulSoup
 import pandas as pd
+import datetime
+
 
 
 headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36",
@@ -8,7 +10,7 @@ headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KH
 
 def scrape_specific_news(url):
     try:
-        print(url)
+        # print(url)
         req = urllib.request.Request(url=url, headers=headers) 
         resp = urllib.request.urlopen(req)
 
@@ -45,11 +47,12 @@ def scrape_specific_news(url):
             if len(texto) <= 1:
                 return None
 
-            print(data, hora)
-            print(url)
-            print(texto)
+            # print(data, hora)
+            # print(url)
+            # print(texto)
+            # print(data)
 
-            print()
+            # print()
 
             noticia = {
                 "url": url,
@@ -58,6 +61,7 @@ def scrape_specific_news(url):
                 "hora": hora,
                 "texto": texto,
             }
+
         
             return noticia
     except Exception as inst:
@@ -70,11 +74,10 @@ def f7(seq):
     return [x for x in seq if not (x in seen or seen_add(x))]
 
 def scrape_investing_news(url):
-    # Fazer a solicitação HTTP para a página de notícias da ação
     req = urllib.request.Request(url=url, headers=headers) 
     resp = urllib.request.urlopen(req)
     
-    status_code = resp.getcode()  # Obtenha o código de status HTTP
+    status_code = resp.getcode()
     
     if status_code == 200:
         soup = BeautifulSoup(resp, 'html.parser')
@@ -104,14 +107,16 @@ def scrape_investing_news(url):
     
 def main():
     urls_noticias = ["magaz-luiza-on-nm-news", "b2w-varejo-on-nm-news", "petrobras-pn-news"]
-    cod_noticias = ["MGLU3", "AMER3", "PETR4"]
+    cod_noticias = ["MGLU3_2", "AMER3_2", "PETR4_2"]
 
     for i in range(len(urls_noticias)): 
         print(f"Notícias do {cod_noticias[i]}\n")
-        cont = 150
+        cont = 25
         cont_aux = cont
         noticias = []
         pag_noticias = 1
+
+        data_inicial = None
 
         while cont > 0:
             res = scrape_investing_news(f"https://br.investing.com/equities/{urls_noticias[i]}/{pag_noticias}")
@@ -124,11 +129,18 @@ def main():
                 for j in range(aux):
                     print(f"indice: {cont_aux-cont}\n")
                     informacao = scrape_specific_news('https://br.investing.com' + urls[j])
-                    if informacao != None:
-                        noticias.append(informacao)
-                        cont -= 1
-                        if cont == 0:
-                            break
+                    if informacao != None and 'data' in informacao:
+                        data_noticia = datetime.datetime.strptime(informacao['data'], '%d.%m.%Y')
+
+                        if data_inicial is None or (data_inicial - data_noticia).days >= 3:
+                            if data_inicial != None:
+                                print("diferença", (data_inicial - data_noticia).days)
+                            noticias.append(informacao)
+                            data_inicial = data_noticia 
+                            print(data_noticia)
+                            cont -= 1
+                            if cont == 0:
+                                break
                 pag_noticias += 1
         df = pd.DataFrame(noticias)
         arquivo = f"{cod_noticias[i]}.csv"
