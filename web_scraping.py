@@ -57,8 +57,7 @@ def scrape_specific_news(url):
             noticia = {
                 "url": url,
                 "titulo": titulo,
-                "data": data,
-                "hora": hora,
+                "data_hora": f'{data} {hora}',
                 "texto": texto,
             }
 
@@ -127,10 +126,11 @@ def main():
                 aux = res[0]
                 urls = res[1]
                 for j in range(aux):
-                    print(f"indice: {cont_aux-cont}\n")
                     informacao = scrape_specific_news('https://br.investing.com' + urls[j])
-                    if informacao != None and 'data' in informacao:
-                        data_noticia = datetime.datetime.strptime(informacao['data'], '%d.%m.%Y')
+                    print(f"indice: {cont_aux-cont}\n")
+                    if informacao != None and 'data_hora' in informacao:
+                        data_aux = informacao['data_hora'].split(' ')
+                        data_noticia = datetime.datetime.strptime(data_aux[0], '%d.%m.%Y')
 
                         if data_inicial is None or (data_inicial - data_noticia).days >= 3:
                             if data_inicial != None:
