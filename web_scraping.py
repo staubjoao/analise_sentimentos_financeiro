@@ -106,7 +106,7 @@ def scrape_investing_news(url):
     
 def main():
     urls_noticias = ["magaz-luiza-on-nm-news", "b2w-varejo-on-nm-news", "petrobras-pn-news"]
-    cod_noticias = ["MGLU3_2", "AMER3_2", "PETR4_2"]
+    cod_noticias = ["MGLU3_3", "AMER3_3", "PETR4_3"]
 
     for i in range(len(urls_noticias)): 
         print(f"Notícias do {cod_noticias[i]}\n")
@@ -115,7 +115,7 @@ def main():
         noticias = []
         pag_noticias = 1
 
-        data_inicial = None
+        data_inicial = datetime.datetime.strptime('5.10.2023', '%d.%m.%Y')
 
         while cont > 0:
             res = scrape_investing_news(f"https://br.investing.com/equities/{urls_noticias[i]}/{pag_noticias}")
